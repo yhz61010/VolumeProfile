@@ -10,13 +10,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VolumeProfile"
         tools:ignore="AllowBackup">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" />
+
+        <activity-alias
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:name=".MainActivityLouder"
+            android:enabled="true"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- "android:name" put any random name started with dot-->
+        <activity-alias
+            android:label="@string/app_name_lower"
+            android:icon="@mipmap/ic_launcher_lower"
+            android:name=".MainActivityLower"
+            android:enabled="false"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
     </application>
 
 </manifest>

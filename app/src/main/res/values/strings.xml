@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">VolumeProfile</string>
+    <string name="app_name">Vol Out</string>
+    <string name="app_name_lower">Vol In</string>
 </resources>

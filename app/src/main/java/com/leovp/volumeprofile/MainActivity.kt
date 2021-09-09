@@ -1,8 +1,10 @@
 package com.leovp.volumeprofile
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -38,11 +40,13 @@ class MainActivity : Activity() {
         if (pref.getInt("conf", -1) > 0) {
             when (pref.getInt("mode", MODE_INDOOR)) {
                 MODE_INDOOR -> {
+                    enableLouderIcon()
                     Toast.makeText(this, "Outdoor mode", Toast.LENGTH_SHORT).show()
                     setIntPref("mode", MODE_OUTDOOR)
                     setAllSoundToMaxVolume()
                 }
                 MODE_OUTDOOR -> {
+                    enableLowerIcon()
                     Toast.makeText(this, "Indoor mode", Toast.LENGTH_SHORT).show()
                     setIntPref("mode", MODE_INDOOR)
                     switchToSpecificVolumeMode()
@@ -181,6 +185,7 @@ class MainActivity : Activity() {
         stopAllSound()
         setIntPref("conf", 1)
         setAllVolumeBySeekBar()
+        enableLowerIcon()
         finish()
     }
 
@@ -193,4 +198,14 @@ class MainActivity : Activity() {
 
     @Suppress("SameParameterValue")
     private fun getIntPref(key: String, defaultValue: Int): Int = pref.getInt(key, defaultValue)
+
+    private fun enableLouderIcon() {
+        packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLouder"), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLower"), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+    }
+
+    private fun enableLowerIcon() {
+        packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLower"), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLouder"), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+    }
 }
