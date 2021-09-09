@@ -1,0 +1,55 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_clear"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message"
+        android:shortcutId="clear_pref"
+        android:shortcutLongLabel="@string/shortcut_long_label_clear"
+        android:shortcutShortLabel="@string/shortcut_short_label_clear">
+        <intent
+            android:action="action_clear_pref"
+            android:targetClass="com.leovp.volumeprofile.MainActivity"
+            android:targetPackage="com.leovp.volumeprofile" />
+        <!-- If your shortcut is associated with multiple intents, include them
+             here. The last intent in the list determines what the user sees when
+             they launch this shortcut. -->
+        <!--        <categories android:name="android.shortcut.conversation" />-->
+        <!--        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />-->
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message"
+        android:shortcutId="outdoor"
+        android:shortcutLongLabel="@string/shortcut_long_label_outdoor"
+        android:shortcutShortLabel="@string/shortcut_short_label_outdoor">
+        <intent
+            android:action="action_outdoor"
+            android:targetClass="com.leovp.volumeprofile.MainActivity"
+            android:targetPackage="com.leovp.volumeprofile" />
+        <!-- If your shortcut is associated with multiple intents, include them
+             here. The last intent in the list determines what the user sees when
+             they launch this shortcut. -->
+        <!--        <categories android:name="android.shortcut.conversation" />-->
+        <!--        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />-->
+    </shortcut>
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher_lower"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message"
+        android:shortcutId="custom"
+        android:shortcutLongLabel="@string/shortcut_long_label_custom"
+        android:shortcutShortLabel="@string/shortcut_short_label_custom">
+        <intent
+            android:action="action_custom"
+            android:targetClass="com.leovp.volumeprofile.MainActivity"
+            android:targetPackage="com.leovp.volumeprofile" />
+        <!-- If your shortcut is associated with multiple intents, include them
+             here. The last intent in the list determines what the user sees when
+             they launch this shortcut. -->
+        <!--        <categories android:name="android.shortcut.conversation" />-->
+        <!--        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />-->
+    </shortcut>
+</shortcuts>

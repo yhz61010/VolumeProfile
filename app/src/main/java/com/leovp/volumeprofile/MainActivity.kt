@@ -31,26 +31,38 @@ class MainActivity : Activity() {
     private val maxSystemVolume: Int by lazy { audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM) }
 
     companion object {
-        private const val MODE_INDOOR = 1
+        private const val MODE_CUSTOM = 1
         private const val MODE_OUTDOOR = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize shortcut action in dynamic way
+//        initShortCutAction()
+
+        when (intent.action) {
+            "action_clear_pref" -> {
+                clearPref()
+                Toast.makeText(this, "Preference cleared!", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+            "action_outdoor" -> {
+                switchToOutdoorMode()
+                finish()
+                return
+            }
+            "action_custom" -> {
+                switchToCustomMode()
+                finish()
+                return
+            }
+        }
+
         if (pref.getInt("conf", -1) > 0) {
-            when (pref.getInt("mode", MODE_INDOOR)) {
-                MODE_INDOOR -> {
-                    enableLouderIcon()
-                    Toast.makeText(this, "Outdoor mode", Toast.LENGTH_SHORT).show()
-                    setIntPref("mode", MODE_OUTDOOR)
-                    setAllSoundToMaxVolume()
-                }
-                MODE_OUTDOOR -> {
-                    enableLowerIcon()
-                    Toast.makeText(this, "Indoor mode", Toast.LENGTH_SHORT).show()
-                    setIntPref("mode", MODE_INDOOR)
-                    switchToSpecificVolumeMode()
-                }
+            when (pref.getInt("mode", MODE_CUSTOM)) {
+                MODE_CUSTOM -> switchToOutdoorMode()
+                MODE_OUTDOOR -> switchToCustomMode()
                 else -> Toast.makeText(this, "Unknown mode", Toast.LENGTH_SHORT).show()
             }
             finish()
@@ -133,6 +145,33 @@ class MainActivity : Activity() {
         })
     }
 
+    private fun switchToCustomMode() {
+        enableLowerIcon()
+        Toast.makeText(this, "Custom mode", Toast.LENGTH_SHORT).show()
+        setIntPref("mode", MODE_CUSTOM)
+        switchToSpecificVolumeMode()
+    }
+
+    private fun switchToOutdoorMode() {
+        enableLouderIcon()
+        Toast.makeText(this, "Outdoor mode", Toast.LENGTH_SHORT).show()
+        setIntPref("mode", MODE_OUTDOOR)
+        setAllSoundToMaxVolume()
+    }
+
+//    private fun initShortCutAction() {
+//        val intent = Intent(this, MainActivity::class.java)
+//        intent.action = "action_clear_pref"
+//        val shortcut = ShortcutInfoCompat.Builder(this, "clear_pref")
+//            .setShortLabel(getString(R.string.shortcut_short_label))
+//            .setLongLabel(getString(R.string.shortcut_long_label))
+//            .setIcon(IconCompat.createWithResource(this, R.drawable.ic_clear))
+//            .setIntent(intent)
+//            .build()
+//
+//        ShortcutManagerCompat.pushDynamicShortcut(this, shortcut)
+//    }
+
     private fun switchToSpecificVolumeMode() {
         audioManager.setStreamVolume(AudioManager.STREAM_RING, getIntPref("volume_ring", 1), 0)
         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, getIntPref("volume_alarm", 1), 0)
@@ -207,5 +246,9 @@ class MainActivity : Activity() {
     private fun enableLowerIcon() {
         packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLower"), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         packageManager.setComponentEnabledSetting(ComponentName(this, "com.leovp.volumeprofile.MainActivityLouder"), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+    }
+
+    private fun clearPref() {
+        pref.edit().clear().apply()
     }
 }

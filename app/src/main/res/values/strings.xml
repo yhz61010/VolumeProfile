@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">Vol Out</string>
     <string name="app_name_lower">Vol In</string>
+
+    <string name="shortcut_disabled_message">NA</string>
+
+    <string name="shortcut_long_label_clear">Clear Setting</string>
+    <string name="shortcut_short_label_clear">Clear</string>
+
+    <string name="shortcut_long_label_outdoor">Outdoor Volume</string>
+    <string name="shortcut_short_label_outdoor">Outdoor Vol</string>
+
+    <string name="shortcut_long_label_custom">Custom Volume</string>
+    <string name="shortcut_short_label_custom">Custom Vol</string>
 </resources>
