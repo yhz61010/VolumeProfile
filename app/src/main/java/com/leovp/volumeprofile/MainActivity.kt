@@ -5,9 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.media.AudioManager
-import android.media.Ringtone
-import android.media.RingtoneManager
+import android.media.*
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -18,6 +16,9 @@ class MainActivity : Activity() {
     private val pref: SharedPreferences by lazy { getSharedPreferences("leo_volume_profile", MODE_PRIVATE) }
 
     private val audioManager: AudioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    private val soundMap = mutableMapOf<String, Int>()
+    private lateinit var soundPool: SoundPool
+    private var soundCounter = 0
 
     private val ringPlayer: Ringtone by lazy { RingtoneManager.getRingtone(applicationContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)) } // TYPE_RINGTONE
     private val alarmPlayer: Ringtone? by lazy { RingtoneManager.getRingtone(applicationContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)) }
@@ -33,6 +34,10 @@ class MainActivity : Activity() {
     companion object {
         private const val MODE_CUSTOM = 1
         private const val MODE_OUTDOOR = 2
+
+        private const val CUSTOM_SOUND_PLAY_VOLUME_VOLUME = 1f
+        private const val OUTDOOR_SOUND_PLAY_VOLUME_VOLUME = 0.1f
+        private const val MAX_SOUND_NUM = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,36 +45,28 @@ class MainActivity : Activity() {
         // Initialize shortcut action in dynamic way
 //        initShortCutAction()
 
-        when (intent.action) {
-            "action_clear_pref" -> {
-                clearPref()
-                Toast.makeText(this, "Preference cleared!", Toast.LENGTH_SHORT).show()
-                finish()
-                return
-            }
-            "action_outdoor" -> {
-                switchToOutdoorMode()
-                finish()
-                return
-            }
-            "action_custom" -> {
-                switchToCustomMode()
-                finish()
-                return
-            }
-        }
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(10)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setLegacyStreamType(AudioManager.STREAM_MUSIC)
+                    .build()
+            ).build().apply {
+                val customSoundId = load(this@MainActivity, R.raw.custom_en_gb_1, 1)
+                val outdoorSoundId = load(this@MainActivity, R.raw.outdoor_en_gb_1, 1)
+                soundMap["custom"] = customSoundId
+                soundMap["outdoor"] = outdoorSoundId
 
-        if (pref.getInt("conf", -1) > 0) {
-            when (pref.getInt("mode", MODE_CUSTOM)) {
-                MODE_CUSTOM -> switchToOutdoorMode()
-                MODE_OUTDOOR -> switchToCustomMode()
-                else -> Toast.makeText(this, "Unknown mode", Toast.LENGTH_SHORT).show()
+                setOnLoadCompleteListener { soundPool, sampleId, status ->
+                    Log.w("LEO", "SoundPool load completed. sampleId=$sampleId status=$status")
+                    if (doProcess(++soundCounter)) {
+                        finish()
+                        return@setOnLoadCompleteListener
+                    }
+                }
             }
-            finish()
-            return
-        }
+
         setContentView(R.layout.activity_main)
-
         initView()
 
         findViewById<SeekBar>(R.id.seekBarRing).progress = audioManager.getStreamVolume(AudioManager.STREAM_RING)
@@ -145,7 +142,42 @@ class MainActivity : Activity() {
         })
     }
 
+    private fun doProcess(counter: Int): Boolean {
+        Log.w("LEO", "doProcess($counter)")
+        if (counter != MAX_SOUND_NUM) return false
+        when (intent.action) {
+            "action_clear_pref" -> {
+                clearPref()
+                Toast.makeText(this@MainActivity, "Preference cleared!", Toast.LENGTH_SHORT).show()
+            }
+            "action_outdoor" -> {
+                switchToOutdoorMode()
+                finish()
+                return true
+            }
+            "action_custom" -> {
+                switchToCustomMode()
+                finish()
+                return true
+            }
+        }
+
+        if (pref.getInt("conf", -1) > 0) {
+            when (pref.getInt("mode", MODE_CUSTOM)) {
+                MODE_CUSTOM -> switchToOutdoorMode()
+                MODE_OUTDOOR -> switchToCustomMode()
+                else -> Toast.makeText(this@MainActivity, "Unknown mode", Toast.LENGTH_SHORT).show()
+            }
+            finish()
+            return true
+        }
+
+        return false
+    }
+
     private fun switchToCustomMode() {
+        Log.w("LEO", "switchToCustomMode()")
+        soundPool.play(soundMap["custom"]!!, CUSTOM_SOUND_PLAY_VOLUME_VOLUME, CUSTOM_SOUND_PLAY_VOLUME_VOLUME, 0, 0, 1f)
         enableLowerIcon()
         Toast.makeText(this, "Custom mode", Toast.LENGTH_SHORT).show()
         setIntPref("mode", MODE_CUSTOM)
@@ -153,6 +185,8 @@ class MainActivity : Activity() {
     }
 
     private fun switchToOutdoorMode() {
+        Log.w("LEO", "switchToOutdoorMode()")
+        soundPool.play(soundMap["outdoor"]!!, OUTDOOR_SOUND_PLAY_VOLUME_VOLUME, OUTDOOR_SOUND_PLAY_VOLUME_VOLUME, 0, 0, 1f)
         enableLouderIcon()
         Toast.makeText(this, "Outdoor mode", Toast.LENGTH_SHORT).show()
         setIntPref("mode", MODE_OUTDOOR)
@@ -224,7 +258,7 @@ class MainActivity : Activity() {
         stopAllSound()
         setIntPref("conf", 1)
         setAllVolumeBySeekBar()
-        enableLowerIcon()
+        switchToCustomMode()
         finish()
     }
 
