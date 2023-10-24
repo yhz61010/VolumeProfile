@@ -57,7 +57,7 @@ class MainActivity : Activity() {
                 soundMap["custom"] = customSoundId
                 soundMap["outdoor"] = outdoorSoundId
 
-                setOnLoadCompleteListener { soundPool, sampleId, status ->
+                setOnLoadCompleteListener { _, sampleId, status ->
                     Log.w("LEO", "SoundPool load completed. sampleId=$sampleId status=$status")
                     if (doProcess(++soundCounter)) {
                         finish()
